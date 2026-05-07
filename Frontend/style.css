@@ -1,0 +1,37 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #111;
+  color: white;
+  font-family: sans-serif;
+}
+
+#telemetry {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#racePath {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#baseMap {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#ui {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+button {
+  padding: 6px 12px;
+  margin-right: 10px;
+}

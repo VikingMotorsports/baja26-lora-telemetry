@@ -1,0 +1,19 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Baja-Telemetry",
+  "license": "MIT",
+  "author": "Patrick Wood",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "electron": "^41.4.0"
+  },
+  "dependencies": {
+    "regl": "^2.1.1"
+  }
+}
