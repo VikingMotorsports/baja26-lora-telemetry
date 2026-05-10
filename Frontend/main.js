@@ -1,48 +1,30 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, webContents } = require('electron')
 const { spawn } = require('child_process');
 const fs = require("fs");
 const write = fs.createWriteStream("data.txt");
 
-//Replace string with filepath of rf program.
-const rf_program = spawn('./test_cpp_program');
+//Change this to the path of your cpp program
+const cpp_program_path = './test_cpp_program';
 
+
+let win;
+let rf_program;
 let message_count = 0;
 let buffer = "";
-
-rf_program.stdout.on('data', (data) => {
-  //Write data directly to a file
-  write.write(`${data}`);
-
-  //Assemble input for display
-  buffer += `${data}`;
-
-  let messages;
-
-  if (buffer[buffer.length - 1] != '\n')
-  {
-    messages = buffer.split('\n');
-    buffer = messages.pop();
-  }
-  else
-  {
-    messages = buffer.split('\n');
-    buffer = "";
-  }
-
-  /* Message count testing for input assembler
-  for (const message of messages)
-  {
-    if(message.trim().length === 0) continue;
-    message_count++;
-  }
-  console.log("Message recieved", message_count);
-  */
-})
-
+let lat;
+let lon;
+let rendererReady = false;
+let pendingTelemetry = [];
+let refreshRate = 60; //Number of times data is send to the renderer per second.
+let delay = 1000 / refreshRate; //Delay time between communication to the renderer
 const path = require('node:path')
 
+ipcMain.on("renderer-ready", () => {
+  rendererReady = true;
+});
+
 const createWindow = () => {
-  let win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -53,8 +35,60 @@ const createWindow = () => {
   win.maximize();
   win.loadFile('index.html')
 
+  rf_program = spawn(cpp_program_path);
+  rf_program.stdout.on('data', (data) => {
+    //Write data directly to a file
+    write.write(`${data}`);
 
+    //Assemble input for display
+    buffer += `${data}`;
+
+    let messages;
+
+    if (buffer[buffer.length - 1] != '\n')
+    {
+      messages = buffer.split('\n');
+      buffer = messages.pop();
+    }
+    else
+    {
+      messages = buffer.split('\n');
+      messages.pop();
+      buffer = "";
+    }
+    
+    let message;
+    for (let i = 0; i < messages.length; i += 1)
+    {
+      message = JSON.parse(messages[i]);
+      lat = message["lat"];
+      lon = message["lon"];
+      pendingTelemetry.push({lat, lon});
+    }
+    /* Message count testing for input assembler
+    for (const message of messages)
+    {
+      if(message.trim().length === 0) continue;
+      message_count++;
+    }
+    console.log("Message recieved", message_count);
+    */
+  })
+  setInterval(() => {
+    if (rendererReady == true)
+    {
+      for (let j = 0; j < pendingTelemetry.length; j += 1)
+      {
+        lat = pendingTelemetry[j]["lat"]
+        lon = pendingTelemetry[j]["lon"]
+        win.webContents.send("telemetry", {lat, lon});
+      }
+      pendingTelemetry = [];
+    }
+  }, delay);
   /*NOTICE: The following code is for testing purposes only*/
+
+  /*
   let t = 0;
   setInterval(() => {
     // Fake circular motion around a center point
@@ -64,6 +98,7 @@ const createWindow = () => {
 
     win.webContents.send("telemetry", { lat, lon });
   }, 100);
+  */
   /*End of testing code*/
 }
 

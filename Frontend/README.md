@@ -16,13 +16,13 @@ Place cpp executable in the Frontend directory
 
 Go to main.js and change
 ```
-const rf_program = spawn('./test_cpp_program');
+const cpp_program_path = './test_cpp_program';
 ```
 
 to
 
 ```
-const rf_program = spawn(PATH TO YOUR PROGRAM);
+const cpp_program_path = PATH_TO_YOUR_PROGRAM;
 ```
 
 ## Run

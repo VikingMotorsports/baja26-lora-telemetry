@@ -3,7 +3,8 @@
 *.xml
 *pgw
 data.txt
-Test cpp program
+Test_cpp_program
+*.bat
 
 # Logs
 logs

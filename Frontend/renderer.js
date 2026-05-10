@@ -1,4 +1,5 @@
 const baseMap_canvas = document.getElementById("baseMap");
+const baseMap_ctx = baseMap_canvas.getContext("2d");
 const telemetry_canvas = document.getElementById("telemetry");
 const telemetry_ctx = telemetry_canvas.getContext("2d");
 const path_canvas = document.getElementById("racePath");
@@ -12,10 +13,12 @@ telemetry_canvas.width = window.innerWidth;
 telemetry_canvas.height = window.innerHeight;
 
 
+/*
 // --- Initialize regl ---
 const regl = createREGL({
   canvas: baseMap_canvas
 });
+*/
 
 function dmsToDecimal(degrees, minutes, seconds)
 {
@@ -24,22 +27,23 @@ function dmsToDecimal(degrees, minutes, seconds)
 
 function gpsToPixel(coordinate, coordinateCenter, canvasCenter, world) {
   x = (coordinate.lon - coordinateCenter.lon) / world.pixelWidth + canvasCenter.x;
-  y = -(coordinate.lat - coordinateCenter.lat) / world.pixelHeight + canvasCenter.y;
+  y = (coordinate.lat - coordinateCenter.lat) / world.pixelHeight + canvasCenter.y;
   return { x, y };
 }
 
 let coordinateCenter = {lon: 0, lat: 0};
 let canvasCenter = {x: 0, y: 0};
-let testCoordinate = {lon: dmsToDecimal(-122, -15, -17.04), lat: dmsToDecimal(45, 38, 6.87)}
+let testCoordinate = {lat: dmsToDecimal(45, 37, 37.58), lon: dmsToDecimal(-122, -15, -29.72)};
 let world = null;
 let scaleTransform = [1,1];
 let trackPoints = [];
 let pointCount = 0;
 let windowFocus = true;
+let imageLoaded = false;
 
 // --- Load the map texture ---
 const mapImage = new Image();
-mapImage.src = "Washougal MX Clipped Map.png";
+
 
 
 
@@ -74,6 +78,7 @@ mapImage.onload = async () => {
   canvasCenter.x = telemetry_canvas.width / 2;
   canvasCenter.y = telemetry_canvas.height / 2;
 
+  /*
   const imageAspect = mapImage.width / mapImage.height;
   const canvasAspect = baseMap_canvas.width / baseMap_canvas.height;
 
@@ -84,9 +89,15 @@ mapImage.onload = async () => {
     // Image is taller than canvas
     scaleTransform[0] = imageAspect / canvasAspect;
   }
+  */
+  let scalingFactor = window.innerHeight / mapImage.height;
 
-  const mapTexture = regl.texture(mapImage);
+  baseMap_ctx.drawImage(mapImage, window.innerWidth / 2 - mapImage.width * scalingFactor / 2, 0, mapImage.width * scalingFactor, mapImage.height * scalingFactor);
 
+  imageLoaded = true;
+  //const mapTexture = regl.texture(mapImage);
+
+  /*
   // Draw a full-screen quad
   const drawMap = regl({
     frag: `
@@ -128,6 +139,7 @@ mapImage.onload = async () => {
   console.log(world.bottomRightLon, world.bottomRightLat);
 
   drawMap();
+  */
 };
 
 
@@ -154,18 +166,20 @@ function drawPath()
   }
 
   //Draw the car point as the latest coordinate.
-  telemetry_ctx.clearRect(0, 0, telemetry_canvas.width, telemetry_canvas.height);
+  
   telemetry_ctx.fillStyle = "red";
   telemetry_ctx.beginPath();
   telemetry_ctx.arc(position.x, position.y, 10, 0, 2 * Math.PI);
+  telemetry_ctx.clearRect(0, 0, telemetry_canvas.width, telemetry_canvas.height);
   telemetry_ctx.fill();
   trackPoints = [];
 }
 
+mapImage.src = "Washougal MX Clipped Map.png";
+status_display = document.getElementById('status');
 
-window.api.onTelemetry(({ lat, lon }) => {
 
-  pointCount += 1;
+setInterval(() => {
 
   /*
   The javascript canvas does not
@@ -176,13 +190,24 @@ window.api.onTelemetry(({ lat, lon }) => {
   regaining focus the window will draw
   all the points in the buffer at once.
   */
-  if(windowFocus === true)
+
+  if(trackPoints.length > 0 && imageLoaded === true && windowFocus === true)
   {
-    trackPoints.push({lat, lon});
+    const display_coord = trackPoints[trackPoints.length - 1]
+    status_display.innerHTML = `Lon: ${display_coord["lon"]}<br>Lat: ${display_coord["lat"]}`;
     requestAnimationFrame(drawPath);
   }
-  else
-  {
-    trackPoints.push({lat, lon});
-  }
+}, 16);
+
+window.api.rendererReady();
+
+window.api.onTelemetry(({ lat, lon }) => {
+  pointCount += 1;
+  
+  trackPoints.push({lat, lon});
+  
+  /*
+  trackPoints.push(testCoordinate);
+  requestAnimationFrame(drawPath);
+  */
 });

@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+     <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
     <title>Map Test</title>
     <link rel="stylesheet" href="style.css">
   </head>
@@ -11,11 +19,11 @@
         <div id="status">Waiting for telemetry…</div>
     </div>
 
-    <canvas id="baseMap" style="z-index: 0;"></canvas>
-    <canvas id="racePath" style="z-index: 1;"></canvas>
-    <canvas id="telemetry" style="z-index: 2;"></canvas>
+    <canvas id="baseMap"></canvas>
+    <canvas id="racePath"></canvas>
+    <canvas id="telemetry"></canvas>
 
-    <script src="https://unpkg.com/regl/dist/regl.min.js"></script>
+    <!-- <script src="https://unpkg.com/regl/dist/regl.min.js"></script> -->
     <script src="renderer.js"></script>
   </body>
 </html>
