@@ -81,7 +81,10 @@ const createWindow = () => {
       {
         lat = pendingTelemetry[j]["lat"]
         lon = pendingTelemetry[j]["lon"]
-        win.webContents.send("telemetry", {lat, lon});
+        if (win && !win.isDestroyed() && win.webContents && !win.webContents.isDestroyed()) 
+        {
+          win.webContents.send("telemetry", { lat, lon });
+        }
       }
       pendingTelemetry = [];
     }
