@@ -14,7 +14,7 @@ let buffer = "";
 let rendererReady = false;
 let pendingTelemetry = [];
 let refreshRate = 60; //Number of times data is send to the renderer per second.
-let delay = 1000 / refreshRate; //Delay time between communication to the renderer
+let delay = 1000 / refreshRate; //Delay time between interval communications to the renderer
 const path = require('node:path')
 
 ipcMain.on("renderer-ready", () => {

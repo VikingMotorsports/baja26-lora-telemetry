@@ -31,7 +31,11 @@ Run command `npm run start` in the Frontend directory to run the program
 ## What your C++ program should do
 The frontend program will read from your C++ program's standard output stream.
 
-Your program outputs should look like the following
+Your program output statement should look like the following
 ```
-std::cout << "{\"timestamp\":" << TIMESTAMP_DATA << ",\"lon\":" << LON_DATA << ",\"lat\":" << LAT_DATA << "}" << std::endl;
+std::cout << "{\"timestamp\":" << TIMESTAMP_DATA
+          << ",\"code\":\""    << CODE << "\""
+          << ",\"lon\":"       << LON_DATA + 0.00001 * count 
+          << ",\"lat\":"       << LAT_DATA << "}" 
+          << std::endl;
 ```
