@@ -11,8 +11,6 @@ let win;
 let rf_program;
 let message_count = 0;
 let buffer = "";
-let lat;
-let lon;
 let rendererReady = false;
 let pendingTelemetry = [];
 let refreshRate = 60; //Number of times data is send to the renderer per second.
@@ -61,9 +59,28 @@ const createWindow = () => {
     for (let i = 0; i < messages.length; i += 1)
     {
       message = JSON.parse(messages[i]);
-      lat = message["lat"];
-      lon = message["lon"];
-      pendingTelemetry.push({lat, lon});
+      if (message["code"] == "coords")
+      {
+        let lat = message["lat"];
+        let lon = message["lon"];
+
+        //Global list
+        pendingTelemetry.push({lat, lon});
+      }
+      else if (message["code"] == "pit")
+      {
+        if (win && !win.isDestroyed() && win.webContents && !win.webContents.isDestroyed())
+        {
+          win.webContents.send("pit", "t")
+        }
+      }
+      else if (message["code"] == "help")
+      {
+        if (win && !win.isDestroyed() && win.webContents && !win.webContents.isDestroyed())
+        {
+          win.webContents.send("help", "t")
+        }
+      }
     }
     /* Message count testing for input assembler
     for (const message of messages)
@@ -79,8 +96,8 @@ const createWindow = () => {
     {
       for (let j = 0; j < pendingTelemetry.length; j += 1)
       {
-        lat = pendingTelemetry[j]["lat"]
-        lon = pendingTelemetry[j]["lon"]
+        let lat = pendingTelemetry[j]["lat"]
+        let lon = pendingTelemetry[j]["lon"]
         if (win && !win.isDestroyed() && win.webContents && !win.webContents.isDestroyed()) 
         {
           win.webContents.send("telemetry", { lat, lon });

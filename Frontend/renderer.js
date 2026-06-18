@@ -211,3 +211,11 @@ window.api.onTelemetry(({ lat, lon }) => {
   requestAnimationFrame(drawPath);
   */
 });
+
+window.api.onPit((isPit) => {
+  console.log("Pit Request Active");
+})
+
+window.api.onHelp((isHelp) => {
+  console.log("Help Requested");
+})
